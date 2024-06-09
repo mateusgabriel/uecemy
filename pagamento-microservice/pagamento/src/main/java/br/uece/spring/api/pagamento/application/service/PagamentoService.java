@@ -76,7 +76,7 @@ public class PagamentoService {
 
     private void dispatchNotificarPagamento(NovoPagamentoDto dto) throws Exception {
         var exchange = "notification-exchange";
-        var routingKey = "new-usuario-key";
+        var routingKey = "notification.success.pagamento.push";
 
         try {
             amqpTemplate.convertAndSend(exchange, routingKey, objectMapper.writeValueAsString(dto));
