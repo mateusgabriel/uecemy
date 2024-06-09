@@ -18,7 +18,7 @@ public class PagamentoController {
     @PostMapping(
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PagamentoDto> comprarCurso(@Validated @RequestBody NovoPagamentoDto dto) {
+    public ResponseEntity<PagamentoDto> comprarCurso(@Validated @RequestBody NovoPagamentoDto dto)  throws Exception {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(pagamentoService.comprarCurso(dto));
