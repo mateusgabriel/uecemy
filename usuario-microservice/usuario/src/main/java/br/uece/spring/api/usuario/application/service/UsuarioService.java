@@ -9,7 +9,6 @@ import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -85,7 +84,11 @@ public class UsuarioService {
     private void incluirCursoUsuario(@Payload Message message) {
         try {
             NovoPagamentoDto dto = objectMapper.readValue(message.getBody(), NovoPagamentoDto.class);
-            var biblioteca = mapper.map(dto, Biblioteca.class);
+
+            var biblioteca = new Biblioteca();
+            biblioteca.setIdCurso(dto.getIdCurso());
+            biblioteca.setIdUsuario(dto.getIdUsuario());
+            
             bibliotecaRepository.save(biblioteca);
         } catch(Exception ex) {
             System.err.println("Falha ao receber pagamento.");
