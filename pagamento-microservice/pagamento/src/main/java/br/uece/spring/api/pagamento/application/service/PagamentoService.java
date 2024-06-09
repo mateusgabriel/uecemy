@@ -46,11 +46,15 @@ public class PagamentoService {
         }
 
         retorno.setMensagem("Pagamento realizado com sucesso.");
-        dispacthNotificarPagamento(dto);
+        dispatchNotificarPagamento(dto);
         return retorno;
     }
 
     private boolean realizarPagamento(String numeroCartao, double preco) {
+        if (preco == 0) {
+            return false;
+        }
+        
         if (numeroCartao.equals("0123698574521698") && preco == 462) {
             return true;
         }
@@ -59,17 +63,24 @@ public class PagamentoService {
             return false;
         }
 
+        if (numeroCartao.startsWith("0") && preco >= 100) {
+            return true;
+        }
+
+        if (numeroCartao.endsWith("9") && preco <= 0) {
+            return true;
+        }
+
         return false;
     }
 
-    private void dispacthNotificarPagamento(NovoPagamentoDto dto) throws Exception {
+    private void dispatchNotificarPagamento(NovoPagamentoDto dto) throws Exception {
         var exchange = "notification-exchange";
         var routingKey = "new-usuario-key";
 
         try {
             amqpTemplate.convertAndSend(exchange, routingKey, objectMapper.writeValueAsString(dto));
-        }
-        catch(Exception ex) {
+        } catch(Exception ex) {
             throw new Exception("Falha ao postar mensagem na fila.");
         }
         

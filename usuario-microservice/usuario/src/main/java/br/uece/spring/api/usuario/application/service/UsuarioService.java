@@ -4,24 +4,34 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import br.uece.spring.api.usuario.application.model.NovoUsuarioDto;
-import br.uece.spring.api.usuario.application.model.UsuarioDto;
-import br.uece.spring.api.usuario.domain.exception.EmailVinculadoUsuarioException;
-import br.uece.spring.api.usuario.domain.exception.UsuarioNaoExistenteException;
-import br.uece.spring.api.usuario.domain.model.Usuario;
-import br.uece.spring.api.usuario.domain.repository.UsuarioRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Service
+import br.uece.spring.api.usuario.application.model.*;
+import br.uece.spring.api.usuario.domain.exception.*;
+import br.uece.spring.api.usuario.domain.model.*;
+import br.uece.spring.api.usuario.domain.repository.*;
+
+@Component
 public class UsuarioService {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private BibliotecaRepository bibliotecaRepository;
+
+    @Autowired
     private ModelMapper mapper;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     // Método para listar usuários
     public List<UsuarioDto> listarUsuarios() {
@@ -68,5 +78,17 @@ public class UsuarioService {
         }
 
         usuarioRepository.delete(usuario);
+    }
+
+    // Método para incluir curso na biblioteca do usuário
+    @RabbitListener(queues = "notification-queue")
+    private void incluirCursoUsuario(@Payload Message message) {
+        try {
+            NovoPagamentoDto dto = objectMapper.readValue(message.getBody(), NovoPagamentoDto.class);
+            var biblioteca = mapper.map(dto, Biblioteca.class);
+            bibliotecaRepository.save(biblioteca);
+        } catch(Exception ex) {
+            System.err.println("Falha ao receber pagamento.");
+        }
     }
 }
