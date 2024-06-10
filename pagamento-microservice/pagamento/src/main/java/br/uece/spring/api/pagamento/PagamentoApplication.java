@@ -13,21 +13,16 @@ import org.springframework.web.client.RestTemplate;
 
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 
+@Configuration
 @EnableRabbit
 @EnableFeignClients(basePackages = {"br.uece.spring.api.pagamento.controller", "br.uece.spring.api.pagamento.application.interfaces"})
 @EnableDiscoveryClient
 @SpringBootApplication
-@Configuration
 public class PagamentoApplication {
 
-@Bean
+	@Bean
 	public OtlpGrpcSpanExporter otlpHttpSpanExporter(@Value("${tracing.url}") String url) {
 		return OtlpGrpcSpanExporter.builder().setEndpoint(url).build();
-	}
-
-	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder builder) {
-		return builder.build();
 	}
 
 	public static void main(String[] args) {
